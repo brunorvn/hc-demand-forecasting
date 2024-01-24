@@ -10,56 +10,53 @@ import pandas as pd
 
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
-@click.argument("output_filepath", type=click.Path())
-def main(input_filepath, output_filepath):
+def main(input_filepath: str):
     """Runs data processing scripts to turn raw data from (../raw) into
     cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
     logger.info("making final data set from raw data")
 
+    raw_df = pd.read_csv(input_filepath, delimiter=",", encoding="latin-1")
+    df = clean_and_convert_to_time_series(raw_df)
+    df.to_csv("results.csv", index=False)
 
-def clean_raw_data(df, vars_str):
+
+def clean_and_convert_to_time_series(
+    df: pd.DataFrame, id_variable: str = "Procedimentos realizados"
+) -> pd.DataFrame:
     df = df.drop(columns=["Total"])
 
-    df = df[df[f"{vars_str}"] != "Total"]
-    return df
+    df = df[df[f"{id_variable}"] != "Total"]
 
+    id_vars = [f"{id_variable}"]
 
-def clean_and_convert_to_time_series(df, vars_str):
-    cleaned_df = clean_raw_data(df, vars_str)
-
-    id_vars = [f"{vars_str}"]
-
-    ts_df = pd.melt(cleaned_df, id_vars=id_vars, var_name="ds", value_name="y")
+    ts_df = pd.melt(df, id_vars=id_vars, var_name="ds", value_name="y")
 
     def parse_custom_date(date_str):
         month_mapping = {
-            "Jan": "January",
-            "Fev": "February",
-            "Mar": "March",
-            "Abr": "April",
-            "Mai": "May",
-            "Jun": "June",
-            "Jul": "July",
-            "Ago": "August",
-            "Set": "September",
-            "Out": "October",
-            "Nov": "November",
-            "Dez": "December",
+            "Janeiro": "January",
+            "Fevereiro": "February",
+            "Março": "March",
+            "Abril": "April",
+            "Maio": "May",
+            "Junho": "June",
+            "Julho": "July",
+            "Agosto": "August",
+            "Setembro": "September",
+            "Outubro": "October",
+            "Novembro": "November",
+            "Dezembro": "December",
         }
 
-        if date_str != "Total":
-            month_str, year_str = date_str.split("/")
-            month_str = month_mapping.get(month_str, month_str)
-            return pd.to_datetime(f"{month_str}/{year_str}", format="%B/%Y")
-
-        return date_str
+        month_str, year_str = date_str.split("/")
+        month_str = month_mapping.get(month_str, month_str)
+        return pd.to_datetime(f"{month_str}/{year_str}", format="mixed")
 
     ts_df["ds"] = ts_df["ds"].apply(parse_custom_date)
 
-    ts_df.rename(columns={vars_str: "unique_id"})
-
+    ts_df.rename(columns={"Procedimentos realizados": "unique_id"}, inplace=True)
+    ts_df.sort_values(by=["unique_id", "ds"], inplace=True)
     return ts_df
 
 
