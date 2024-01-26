@@ -3,7 +3,6 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import pymannkendall
 
 path = os.path.join(
     "C:/Users/brvn/Documents/github/projects/HC/tcc_brvn/src",
@@ -37,4 +36,4 @@ plt.plot(df["ds"], media_movel)
 plt.show()
 
 # Realizar o teste de Mann-Kendall
-teste_mann_kendall = pymannkendall.correlated_seasonal_test()
+# teste_mann_kendall = pymannkendall.correlated_seasonal_test()
