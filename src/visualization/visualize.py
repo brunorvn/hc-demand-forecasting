@@ -1,39 +1,43 @@
-import os
-
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 
-path = os.path.join(
-    "C:/Users/brvn/Documents/github/projects/HC/tcc_brvn/src",
-    "data",
-    "subgroups-dataset.csv",
-)
+def create_plots(path):
+    """
+    Cria plots para a tendência da série temporal e salva na pasta /reports/figures.
 
-# Importar os dados
-df = pd.read_csv(path)
+    Parameters:
+    - path (str): Caminho para o arquivo CSV com os dados.
+    """
+    df = pd.read_csv(path)
+    df["unique_id"] = df["unique_id"].astype("category")
 
-# Pegar somente os dois uids
-df = df[(df["unique_id"] == int("0202")) | (df["unique_id"] == int("0301"))]
+    for unique_id in df["unique_id"].cat.categories:
+        df_id = df[df["unique_id"] == unique_id]
+        df_id["ds"] = pd.to_datetime(df_id["ds"])
+        df_id.set_index("unique_id", inplace=True)
 
-# Mudar as categorias
-df["unique_id"] = df["unique_id"].astype("category")
-df.set_index("unique_id", inplace=True)  # Mudar o unique_id para index
-df["ds"] = pd.to_datetime(df["ds"])  # Mudar pra datetime
+        plt.figure()
+        plt.title(f"Tendência da série temporal para ID {unique_id}")
+        plt.plot(df_id["ds"], df_id["y"])
+        plt.xlabel("Data")
+        plt.ylabel("Valores")
+        plt.grid(True)
+        plt.tight_layout()
+
+        # Ajuste do caminho para salvar na pasta correta
+        save_path = os.path.join("reports", "figures", f"plot_{unique_id}.png")
+        plt.savefig(save_path)
+        plt.close()
 
 
-# Plotar os dados
-plt.title("Tendência da série temporal")
-plt.plot(df["ds"], df["y"])
-plt.show()
+def main():
+    # dataset_path = os.path.join("..", "data", "interim", "oftalmo_ts.csv")
 
-# Calcular a média móvel
-media_movel = df["y"].rolling(window=5).mean()
+    create_plots(r"C:\Users\brvn\Documents\github\hc-demand-forecasting\data\processed\forecasted-df.csv")
 
-# Plotar a média móvel
-plt.title("Tendência da série temporal após suavização")
-plt.plot(df["ds"], media_movel)
-plt.show()
 
-# Realizar o teste de Mann-Kendall
-# teste_mann_kendall = pymannkendall.correlated_seasonal_test()
+
+if __name__ == "__main__":
+    main()
