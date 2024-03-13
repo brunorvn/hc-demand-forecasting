@@ -2,6 +2,26 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
+# Set Matplotlib defaults
+plt.style.use("seaborn-whitegrid")
+plt.rc("figure", autolayout=True, figsize=(11, 4))
+plt.rc(
+    "axes",
+    labelweight="bold",
+    labelsize="large",
+    titleweight="bold",
+    titlesize=14,
+    titlepad=10,
+)
+plot_params = dict(
+    color="0.75",
+    style=".-",
+    markeredgecolor="0.25",
+    markerfacecolor="0.25",
+    legend=False,
+)
+# %config InlineBackend.figure_format = 'retina'
+
 
 def create_plots(path):
     """
@@ -26,17 +46,17 @@ def create_plots(path):
         plt.grid(True)
         plt.tight_layout()
 
-        # Ajuste do caminho para salvar na pasta correta
         save_path = os.path.join("reports", "figures", f"plot_{unique_id}.png")
         plt.savefig(save_path)
         plt.close()
 
 
 def main():
-    # dataset_path = os.path.join("..", "data", "interim", "oftalmo_ts.csv")
+    # dataset_path = os.path.join("hc-demand-forecasting", "data", "interim", "oftalmo_ts.csv")
 
-    create_plots(r"C:\Users\brvn\Documents\github\hc-demand-forecasting\data\processed\forecasted-df.csv")
-
+    create_plots(
+        r"C:\Users\brvn\Documents\github\hc-demand-forecasting\data\processed\forecasted-df.csv"
+    )
 
 
 if __name__ == "__main__":
